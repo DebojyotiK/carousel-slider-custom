@@ -14,7 +14,11 @@ export 'carousel_controller.dart';
 export 'carousel_options.dart';
 
 typedef Widget ExtendedIndexedWidgetBuilder(
-    BuildContext context, int index, int realIndex);
+  BuildContext context,
+  int index,
+  int realIndex,
+  double offset,
+);
 
 class CarouselSlider extends StatefulWidget {
   /// [CarouselOptions] to create a [CarouselState] with
@@ -333,65 +337,64 @@ class CarouselSliderState extends State<CarouselSlider>
           animation: carouselState!.pageController!,
           child: (widget.items != null)
               ? (widget.items!.length > 0 ? widget.items![index] : Container())
-              : widget.itemBuilder!(context, index, idx),
+              : null,
           builder: (BuildContext context, child) {
             double distortionValue = 1.0;
             // if `enlargeCenterPage` is true, we must calculate the carousel item's height
             // to display the visual effect
-            double itemOffset = 0;
+            double itemOffset = _getItemOffset(0, idx);
             if (widget.options.enlargeCenterPage != null &&
                 widget.options.enlargeCenterPage == true) {
               // pageController.page can only be accessed after the first build,
               // so in the first build we calculate the itemoffset manually
-              var position = carouselState?.pageController?.position;
-              if (position != null &&
-                  position.hasPixels &&
-                  position.hasContentDimensions) {
-                var _page = carouselState?.pageController?.page;
-                if (_page != null) {
-                  itemOffset = _page - idx;
-                }
-              } else {
-                BuildContext storageContext = carouselState!
-                    .pageController!.position.context.storageContext;
-                final double? previousSavedPosition =
-                    PageStorage.of(storageContext)?.readState(storageContext)
-                        as double?;
-                if (previousSavedPosition != null) {
-                  itemOffset = previousSavedPosition - idx.toDouble();
-                } else {
-                  itemOffset =
-                      carouselState!.realPage.toDouble() - idx.toDouble();
-                }
-              }
-
-              final double enlargeFactor =
-                  options.enlargeFactor.clamp(0.0, 1.0);
-              final num distortionRatio =
-                  (1 - (itemOffset.abs() * enlargeFactor)).clamp(0.0, 1.0);
-              distortionValue =
-                  Curves.easeOut.transform(distortionRatio as double);
+              final double enlargeFactor = options.enlargeFactor.clamp(0.0, 1.0);
+              final num distortionRatio = (1 - (itemOffset.abs() * enlargeFactor)).clamp(0.0, 1.0);
+              distortionValue = Curves.easeOut.transform(distortionRatio as double);
             }
 
-            final double height = widget.options.height ??
-                MediaQuery.of(context).size.width *
-                    (1 / widget.options.aspectRatio);
-
+            final double height = widget.options.height ?? MediaQuery.of(context).size.width * (1 / widget.options.aspectRatio);
+            final Widget _resolvedChild = child ?? widget.itemBuilder!(context,index,idx,itemOffset);
             if (widget.options.scrollDirection == Axis.horizontal) {
-              return getCenterWrapper(getEnlargeWrapper(child,
-                  height: distortionValue * height,
-                  scale: distortionValue,
-                  itemOffset: itemOffset));
+              return getCenterWrapper(getEnlargeWrapper(
+                _resolvedChild,
+                height: distortionValue * height,
+                scale: distortionValue,
+                itemOffset: itemOffset,
+              ));
             } else {
-              return getCenterWrapper(getEnlargeWrapper(child,
-                  width: distortionValue * MediaQuery.of(context).size.width,
-                  scale: distortionValue,
-                  itemOffset: itemOffset));
+              return getCenterWrapper(getEnlargeWrapper(
+                _resolvedChild,
+                width: distortionValue * MediaQuery.of(context).size.width,
+                scale: distortionValue,
+                itemOffset: itemOffset,
+              ));
             }
           },
         );
       },
     ));
+  }
+
+  double _getItemOffset(
+    double itemOffset,
+    int idx,
+  ) {
+    var position = carouselState?.pageController?.position;
+    if (position != null && position.hasPixels && position.hasContentDimensions) {
+      var _page = carouselState?.pageController?.page;
+      if (_page != null) {
+        itemOffset = _page - idx;
+      }
+    } else {
+      BuildContext storageContext = carouselState!.pageController!.position.context.storageContext;
+      final double? previousSavedPosition = PageStorage.of(storageContext).readState(storageContext) as double?;
+      if (previousSavedPosition != null) {
+        itemOffset = previousSavedPosition - idx.toDouble();
+      } else {
+        itemOffset = carouselState!.realPage.toDouble() - idx.toDouble();
+      }
+    }
+    return itemOffset;
   }
 }
 

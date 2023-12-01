@@ -382,19 +382,20 @@ class OnDemandCarouselDemo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('On-demand carousel demo')),
       body: Container(
-          child: CarouselSlider.builder(
-        itemCount: 100,
-        options: CarouselOptions(
-          aspectRatio: 2.0,
-          enlargeCenterPage: true,
-          autoPlay: true,
+        child: CarouselSlider.builder(
+          itemCount: 100,
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+            autoPlay: true,
+          ),
+          itemBuilder: (ctx, index, realIdx, _) {
+            return Container(
+              child: Text(index.toString()),
+            );
+          },
         ),
-        itemBuilder: (ctx, index, realIdx) {
-          return Container(
-            child: Text(index.toString()),
-          );
-        },
-      )),
+      ),
     );
   }
 }
@@ -485,19 +486,20 @@ class _PrefetchImageDemoState extends State<PrefetchImageDemo> {
     return Scaffold(
       appBar: AppBar(title: Text('Prefetch image slider demo')),
       body: Container(
-          child: CarouselSlider.builder(
-        itemCount: images.length,
-        options: CarouselOptions(
-          autoPlay: true,
-          aspectRatio: 2.0,
-          enlargeCenterPage: true,
+        child: CarouselSlider.builder(
+          itemCount: images.length,
+          options: CarouselOptions(
+            autoPlay: true,
+            aspectRatio: 2.0,
+            enlargeCenterPage: true,
+          ),
+          itemBuilder: (context, index, realIdx, _) {
+            return Container(
+              child: Center(child: Image.network(images[index], fit: BoxFit.cover, width: 1000)),
+            );
+          },
         ),
-        itemBuilder: (context, index, realIdx) {
-          return Container(
-            child: Center(child: Image.network(images[index], fit: BoxFit.cover, width: 1000)),
-          );
-        },
-      )),
+      ),
     );
   }
 }
@@ -612,29 +614,32 @@ class MultipleItemDemo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Multiple item in one slide demo')),
       body: Container(
-          child: CarouselSlider.builder(
-        options: CarouselOptions(
-          aspectRatio: 2.0,
-          enlargeCenterPage: false,
-          viewportFraction: 1,
+        child: CarouselSlider.builder(
+          options: CarouselOptions(
+            aspectRatio: 2.0,
+            enlargeCenterPage: false,
+            viewportFraction: 1,
+          ),
+          itemCount: (imgList.length / 2).round(),
+          itemBuilder: (context, index, realIdx, _) {
+            final int first = index * 2;
+            final int second = first + 1;
+            return Row(
+              children: [first, second].map(
+                (idx) {
+                  return Expanded(
+                    flex: 1,
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 10),
+                      child: Image.network(imgList[idx], fit: BoxFit.cover),
+                    ),
+                  );
+                },
+              ).toList(),
+            );
+          },
         ),
-        itemCount: (imgList.length / 2).round(),
-        itemBuilder: (context, index, realIdx) {
-          final int first = index * 2;
-          final int second = first + 1;
-          return Row(
-            children: [first, second].map((idx) {
-              return Expanded(
-                flex: 1,
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Image.network(imgList[idx], fit: BoxFit.cover),
-                ),
-              );
-            }).toList(),
-          );
-        },
-      )),
+      ),
     );
   }
 }
