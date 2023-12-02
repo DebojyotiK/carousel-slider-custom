@@ -680,14 +680,13 @@ class CustomTransformDemo extends StatelessWidget {
             height: 400,
             enlargeCenterPage: false,
             clipBehavior: Clip.none,
-            viewportFraction: 0.5,
+            viewportFraction: 0.75,
           ),
           itemCount: imageSliders.length,
           itemBuilder: (context, index, realIndex, offset) {
-            return Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: index%2 == 0? Colors.black : Colors.grey,width: 1)
-              ),
+            return Padding(
+              child: _transformedChild(offset),
+              padding: EdgeInsets.symmetric(horizontal: 12),
             );
           },
         ),
@@ -696,18 +695,25 @@ class CustomTransformDemo extends StatelessWidget {
   }
 
   Transform _transformedChild(double offset) {
+    return Transform.rotate(
+      alignment: offset > 0 ? Alignment.bottomRight : Alignment.bottomLeft,
+      child: Container(
+        color: Colors.red,
+      ),
+      angle: -1 * degreesToRadians(5) * offset,
+    );
     return Transform.translate(
-              offset: Offset(0,15.0*offset.abs()),
-              child: Transform.rotate(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 32*(1-1*offset.abs()).clamp(0, 32)),
-                  child: Container(
-                    color: Colors.red,
-                  ),
-                ),
-                angle: -1 * degreesToRadians(5) * offset,
-              ),
-            );
+      offset: Offset(0, 15.0 * offset.abs()),
+      child: Transform.rotate(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32 * (1 - 1 * offset.abs()).clamp(0, 32)),
+          child: Container(
+            color: Colors.red,
+          ),
+        ),
+        angle: -1 * degreesToRadians(5) * offset,
+      ),
+    );
   }
 
   double degreesToRadians(double degrees) {
