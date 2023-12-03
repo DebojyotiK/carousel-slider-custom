@@ -42,7 +42,7 @@ class CarouselControllerImpl implements CarouselController {
       _state!.changeMode(CarouselPageChangedReason.controller);
 
   @override
-  bool get ready => _state != null;
+  bool get ready => _state?.pageController?.page != null;
 
   @override
   Future<Null> get onReady => _readyCompleter.future;
